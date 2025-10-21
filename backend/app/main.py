@@ -90,14 +90,14 @@ async def health_check():
 
 
 # Include routers
-from app.routes import auth, api_keys
+from app.routes import auth, api_keys, inference
 
 app.include_router(auth.router, prefix=f"{settings.api_prefix}/auth", tags=["Authentication"])
 app.include_router(api_keys.router, prefix=f"{settings.api_prefix}/api-keys", tags=["API Keys"])
+app.include_router(inference.router, prefix="/v1", tags=["Inference"])
 
 # TODO: Add more routers
-# from app.routes import inference, admin
-# app.include_router(inference.router, prefix="/v1", tags=["inference"])
+# from app.routes import admin
 # app.include_router(admin.router, prefix=f"{settings.api_prefix}/admin", tags=["admin"])
 
 
