@@ -60,11 +60,13 @@ subscriptions (id, user_id, plan, stripe_subscription_id, status)
 - p95 latency: <2.5 seconds (relax the 1.8s target for MVP)
 - Support 10 concurrent requests
 
-**Cost Estimate**:
-- 1x GPU node (T4 or A10g): ~$500-800/month
-- RDS PostgreSQL: ~$50/month
-- Redis: ~$30/month
-- **Total**: ~$600-900/month (well under budget)
+**Cost Estimate (AWS with Spot Instances)**:
+- 1x GPU node (g4dn.xlarge T4, spot): ~$114/month
+- RDS PostgreSQL (db.t3.micro): ~$15/month
+- ElastiCache Redis (cache.t3.micro): ~$12/month
+- S3 + Data Transfer: ~$20/month
+- **Total**: ~$161/month (aggressive savings with spot instances)
+- **On-Demand Fallback**: ~$407/month if spot unavailable
 
 ---
 
@@ -121,12 +123,12 @@ Pro:    1M tokens/month,   $49
 | **Database** | PostgreSQL 15 (Cloud SQL/RDS) | Managed, reliable, ACID |
 | **Cache/Queue** | Redis 7 (Managed) | Simple, proven, low ops |
 | **Inference** | vLLM | Best OSS inference engine |
-| **Container Orchestration** | Kubernetes (GKE or EKS) | Industry standard |
+| **Container Orchestration** | Kubernetes (EKS) | Industry standard, spot instance integration |
 | **IaC** | Terraform | Declarative, widely used |
 | **Observability** | Prometheus + Grafana (Helm) | Standard K8s stack |
 | **Auth** | JWT + API Keys | Simple, secure |
 | **Billing** | Stripe | De facto standard |
-| **Cloud** | GCP (preferred) or AWS | GKE is simpler than EKS |
+| **Cloud** | AWS | 70% cost savings with spot instances, better GPU availability |
 
 ---
 
@@ -205,13 +207,13 @@ Deferred to v2+ (after validating product-market fit):
 ```
 
 **Deployment**:
-- 1x GKE cluster (2-3 nodes: 1 GPU, 2 CPU)
-- 1x Cloud SQL instance (small, HA optional)
-- 1x Redis instance (Memorystore/ElastiCache)
-- Cloud Storage for model artifacts
-- Load balancer with SSL cert
+- 1x EKS cluster (2-3 nodes: 1 GPU spot, 2 CPU on-demand)
+- 1x RDS PostgreSQL instance (db.t3.micro)
+- 1x ElastiCache Redis instance (cache.t3.micro)
+- S3 for model artifacts
+- Application Load Balancer with ACM SSL cert
 
-**Estimated Monthly Cost**: $800-1,200
+**Estimated Monthly Cost**: $161 (spot) to $407 (on-demand)
 
 ---
 
@@ -308,11 +310,14 @@ dendrer-core/
 
 | Date | Decision | Rationale |
 |------|----------|-----------|
-| 2024-10-21 | Use FastAPI over NestJS | Python ML ecosystem, team familiarity |
-| 2024-10-21 | GCP over AWS | GKE simpler, better free credits |
-| 2024-10-21 | Defer fine-tuning | Validate inference demand first |
-| 2024-10-21 | Start with Llama 2 7B | Permissive license, proven performance |
-| 2024-10-21 | Use managed DB/Redis | Focus on core value, not ops |
+| 2024-10-21 | Use FastAPI over NestJS | Python ML ecosystem, async support, rapid iteration |
+| 2024-10-21 | AWS over GCP | 70% cost savings with spot instances ($114 vs $317/mo), better GPU availability |
+| 2024-10-21 | Mistral 7B v0.3 over Llama | Apache 2.0 license (truly open), no commercial restrictions, good performance |
+| 2024-10-21 | Defer fine-tuning | Validate inference demand first, reduce scope |
+| 2024-10-21 | Use managed DB/Redis | Focus on core value, not ops (RDS, ElastiCache) |
+| 2024-10-21 | Keep closed source for MVP | Validate business model before open sourcing |
+| 2024-10-21 | Target indie devs & startups | Will pay $49/mo, need OpenAI alternatives, give good feedback |
+| 2024-10-21 | Use dendrer.com domain | Already owned, professional .com TLD |
 
 ---
 
@@ -336,11 +341,11 @@ dendrer-core/
 
 ## Questions to Answer Before Building
 
-- [ ] Which cloud provider? (GCP or AWS)
-- [ ] Which model for MVP? (Llama 2 7B, Mistral 7B, or other)
-- [ ] Open source the project? (Yes/No/Later)
-- [ ] Domain name? (dendrer.ai, dendrer.io, etc)
-- [ ] Target beta user persona? (Hobbyists, startups, researchers)
+- [x] Which cloud provider? **AWS** - Better spot instance pricing (70% off), more reliable GPU availability
+- [x] Which model for MVP? **Mistral 7B v0.3** - Apache 2.0 license, fast, good quality
+- [x] Open source the project? **No** - Keep closed during MVP validation, reconsider after PMF
+- [x] Domain name? **dendrer.com** - Already owned
+- [x] Target beta user persona? **Indie developers & small startups** - Building AI apps, will pay for convenience, need cost-effective alternatives to OpenAI API
 
 ---
 
@@ -349,7 +354,9 @@ dendrer-core/
 - **vLLM Docs**: https://docs.vllm.ai/
 - **FastAPI Docs**: https://fastapi.tiangolo.com/
 - **Stripe API**: https://stripe.com/docs/api
-- **Terraform GKE**: https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/container_cluster
+- **Terraform EKS**: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/eks_cluster
+- **AWS Spot Instances**: https://aws.amazon.com/ec2/spot/
+- **Mistral 7B**: https://huggingface.co/mistralai/Mistral-7B-v0.3
 
 ---
 
