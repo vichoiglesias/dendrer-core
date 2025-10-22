@@ -57,9 +57,10 @@ class Settings(BaseSettings):
     default_model: str = "mistralai/Mistral-7B-Instruct-v0.3"
 
     # Quotas (tokens per month)
-    free_tier_quota: int = 10_000
-    pro_tier_quota: int = 1_000_000
-    business_tier_quota: int = 5_000_000
+    free_tier_quota: int = 10_000        # $0 - Trial/testing
+    starter_tier_quota: int = 100_000    # $29 - Dev sandbox
+    pro_tier_quota: int = 1_000_000      # $99 - Production apps
+    business_tier_quota: int = 10_000_000  # $399 - Dedicated GPU slice
 
 
 @lru_cache()

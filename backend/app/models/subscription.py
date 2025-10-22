@@ -16,10 +16,11 @@ if TYPE_CHECKING:
 
 class PlanTier(str, enum.Enum):
     """Subscription plan tiers."""
-    FREE = "free"
-    PRO = "pro"
-    BUSINESS = "business"
-    ENTERPRISE = "enterprise"
+    FREE = "free"          # $0 - 10k tokens (trial/testing)
+    STARTER = "starter"    # $29 - 100k tokens (dev sandbox)
+    PRO = "pro"            # $99 - 1M tokens
+    BUSINESS = "business"  # $399 - 10M tokens (dedicated GPU slice)
+    ENTERPRISE = "enterprise"  # Custom pricing
 
 
 class SubscriptionStatus(str, enum.Enum):
@@ -102,6 +103,7 @@ class Subscription(Base, TimestampMixin):
 
         quota_map = {
             PlanTier.FREE: settings.free_tier_quota,
+            PlanTier.STARTER: settings.starter_tier_quota,
             PlanTier.PRO: settings.pro_tier_quota,
             PlanTier.BUSINESS: settings.business_tier_quota,
             PlanTier.ENTERPRISE: 999_999_999,  # Unlimited for enterprise
